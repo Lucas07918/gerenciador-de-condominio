@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { render } from "react-dom";
 import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, ImageBackground, TextInput } from "react-native";
 import Carousel from "react-native-snap-carousel";
@@ -14,9 +14,11 @@ import CustomSwicth from "./CustomSwitch";
 import ListItem from "./ListItem";
 import { signOut } from "firebase/auth";
 import { useNavigation } from "@react-navigation/native";
+import { AuthContext } from "../../src/context/authContext";
 
 export default function HomeScreen({navigation}) {
     const [gamesTab, setGamesTab] = useState(1);
+    const {userInfo} = useContext(AuthContext)
 
     const renderBanner = ({item, index}) => {
         return <BannerSlider data={item} />
@@ -25,7 +27,7 @@ export default function HomeScreen({navigation}) {
     const onSelectedSwitch = (value) => {
         setGamesTab(value);
     }
-
+    console.log('user info', userInfo)
     return(
         <SafeAreaView style={{
             flex:1,
@@ -48,7 +50,7 @@ export default function HomeScreen({navigation}) {
                     source={require('../assets/images/user-profile-ted.jpg')} 
                     style={{width:120,height:120, marginBottom: 10}} 
                     imageStyle={{borderRadius:100, borderWidth: 6, borderColor:'#206ba3'}} />
-                    <Text style={{fontSize:23, fontWeight: 700, color: 'white'}}>Olá Ted!!!</Text>
+                    <Text style={{fontSize:23, fontWeight: 700, color: 'white'}}>{`Olá, ${userInfo.nome}`}</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={{

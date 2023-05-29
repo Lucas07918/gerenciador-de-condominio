@@ -45,23 +45,6 @@ const LoginScreen = ({navigation}) => {
                     setUserInfo(doc.data())
                 })
             })
-
-
-           /* const pedidosRef = collection(database, "Pedidos");
-            const consulta = query(pedidosRef, where('bloco','==','B'), where('num_apart','==',302))
-
-            //console.log(getDocs(q))
-            
-            const resposta = async () => await getDocs(consulta);
-            resposta().then((respostaPesquisa)=> {
-            const data = [];
-            respostaPesquisa.docs.forEach((doc)=>{
-                data.push(doc.data())
-            })
-            setTasks(data)
-            }).catch((erro)=>{
-            console.log(erro)
-            })*/
         })
     }
 

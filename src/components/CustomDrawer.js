@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { View, Text, ImageBackground, Image, TouchableOpacity } from "react-native";
 import { DrawerContentScrollView, DrawerItemList } from "@react-navigation/drawer";
 import { auth } from "../../config/firebase";
@@ -8,13 +8,16 @@ import { FontAwesome5 } from "react-native-vector-icons/FontAwesome5";
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from "@react-navigation/native";
 import { signOut } from "firebase/auth";
+import { AuthContext } from "../context/authContext";
 
 const CustomDrawer = (props) => {
 
     const navigation = useNavigation();
+    const {setUserInfo, userInfo} = useContext(AuthContext);
 
     const signout = () => {
         signOut(auth).then(() => {
+            setUserInfo(undefined);
             navigation.replace("Login");
         })
        }
@@ -28,10 +31,10 @@ const CustomDrawer = (props) => {
             <ImageBackground source={require('../assets/images/menu-bg-verde.jpg')} style={{padding:20}}>
                 <Image source={require('../assets/images/user-profile-ted.jpg')} 
                 style={{height:80,width:80,borderRadius:40, borderWidth: 5, borderColor: '#18a051',marginBottom:10}} />
-                <Text style={{color:'#fff', fontSize:18, fontWeight:500}}>Ted Mosby</Text>
+                <Text style={{color:'#fff', fontSize:18, fontWeight:500}}>{userInfo?.nome}</Text>
             <View style={{flexDirection:'row', alignItems:'center'}}>
-                <Text style={{color:'#fff', fontWeight:400}}>280 Coins</Text>
-                <MaterialIcons name="toll" size={14} color="#fff" style={{marginLeft:3}} />
+               
+                
             </View>
             </ImageBackground>
             <View style={{flex:1, backgroundColor:'#fff', paddingTop: 10}}>

@@ -7,6 +7,7 @@ import { useNavigation } from "@react-navigation/native";
 import { Container, Card, UserInfo, UserImgWrapper, UserImg, UserInfoText, UserName, PostTime, MessageText, TextSection } from "../styles/MessageStyles";
 import { useContext } from "react";
 import { AuthContext } from "../context/authContext.js";
+import Avatar from "../components/Avatar.js";
 
 
 export default function ContactsScreen({ type, description, user, style, time, room, image }) {
@@ -49,6 +50,7 @@ export default function ContactsScreen({ type, description, user, style, time, r
               <Card onPress={() => navigation.navigate("Chat", item)}>
                 <UserInfo>
                   <UserImgWrapper>
+                    <Avatar size={50} />
                   </UserImgWrapper>
                   <TextSection>
                     <UserInfoText>

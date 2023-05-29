@@ -15,91 +15,94 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { useContext } from "react";
 import { AuthContext } from "../context/authContext";
-import { collection, onSnapshot, deleteDoc, doc, query, where, getDocs } from "firebase/firestore";
+import { collection, onSnapshot, deleteDoc, doc, query, where, getDocs, or } from "firebase/firestore";
 import { database } from "../../config/firebase.js";
 import ContactsFloatingIcon from "../components/ContactsFloatingIcon";
+import { useState } from "react";
 
 
- const Messages = [
-  {
-    id: '1',
-    userName: 'Tracy Mcconell',
-    userImg: require('../assets/users/tracy-mcconnell.jpg'),
-    messageTime: '4 mins ago',
-    messageText:
-      'Hey there, this is my test for a post of my social app in React Native.',
-  },
-  {
-    id: '2',
-    userName: 'Marshall Eriksen',
-    userImg: require('../assets/users/marshall-eriksen.jpg'),
-    messageTime: '1 hours ago',
-    messageText:
-      'Hey there, this is my test for a post of my social app in React Native.',
-  },
-  {
-    id: '3',
-    userName: 'Barney Stinson',
-    userImg: require('../assets/users/barney-stinson.jpg'),
-    messageTime: '2 hours ago',
-    messageText:
-      'Hey there, this is my test for a post of my social app in React Native.',
-  },
-  {
-    id: '4',
-    userName: 'Lily Audrin',
-    userImg: require('../assets/users/lily-aldrin.jpg'),
-    messageTime: '1 day ago',
-    messageText:
-      'Hey there, this is my test for a post of my social app in React Native.',
-  },
-  {
-    id: '5',
-    userName: 'Robin Scherbatsky',
-    userImg: require('../assets/users/robin-scherbatsky.jpg'),
-    messageTime: '2 days ago',
-    messageText:
-      'Hey there, this is my test for a post of my social app in React Native.',
-  },
-];
 
 const MessageScreen = () => {
   const navigation = useNavigation();
+  const [rooms,setRooms] = useState([])
   const {userInfo} = useContext(AuthContext)
 
-  /*useEffect( () => {
+  useEffect( () => {
 
+  const users = [];
+  const userRef = collection(database, "Usuario");
+  const consultaUser = query(userRef)
+  
+  const userResposta = async () => await getDocs(consultaUser);
+  userResposta().then((respostaPesquisa)=> {
+    respostaPesquisa.docs.forEach((doc)=>{
+      users.push(doc.data())
+    })})
+
+    ///
     console.log(userInfo.bloco)
     console.log(userInfo.num_apart)
      const salasRef = collection(database, "Salas");
-     const consulta = query(salasRef, where('bloco','==', userInfo.bloco), where('num_apart','==',userInfo.num_apart))
+     const consulta = query(salasRef, 
+        or(where('user_email','==', userInfo.email), where('contact_email','==',userInfo.email))
+        
+      )
  
      //console.log(getDocs(q))
      
      const resposta = async () => await getDocs(consulta);
      resposta().then((respostaPesquisa)=> {
-       //console.log(respostaPesquisa.docs)
+       console.log(respostaPesquisa.docs.length)
        const data = [];
-       respostaPesquisa.docs.forEach((doc)=>{
-         data.push(doc.data())
+       console.log('Users2',users)
+       respostaPesquisa.docs.forEach((doc,index)=>{
+         console.log(doc.data())
+
+        const userContact = doc.data().user_email === userInfo.email 
+        ? doc.data().contact_email 
+        : doc.data().user_email; 
+
+        const currentContact = users.filter((user)=>user.email === userContact).pop();
+        
+          
+         data.push({
+          id: index +1,
+          userName: currentContact.nome,
+          bloco:'bloco',
+          email: userContact,
+          nome:currentContact.nome,
+          num_apart:' n  apart',
+          userImg: require('../assets/users/None-user.jpg'),
+          //messageTime: '4 mins ago',
+          messageText:
+            'Continuar conversa',
+        })
        })
-       setTasks(data)
+       setRooms([...data])
+      // setTasks(data)
      }).catch((erro)=>{
        console.log(erro)
      })
+    ///
+   
+
+  
+
+
+   
  
      return () => {
-       resposta();
+      // resposta();
      };
-   }, []);*/
+   }, []);
 
     return(
         <Container>
             <FlatList
-                data={Messages}
+                data={rooms}
                 keyExtractor={item=>item.id}
                 renderItem={({item}) => (
-                    <Card onPress={() => navigation.navigate('Chat', {userName:item.userName})} >
+                    <Card onPress={() => navigation.navigate('Chat', item)} >
                       <UserInfo>
                         <UserImgWrapper>
                           <UserImg source={item.userImg} />

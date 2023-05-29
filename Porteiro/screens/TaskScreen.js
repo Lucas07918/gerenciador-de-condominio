@@ -66,7 +66,7 @@ export default function Task({ navigation }) {
                 navigation.navigate("Details", item)
               }
             >
-                {`${item.delivery} - ${item.bloco} - ${item.num_apart}`}
+                {`${item.delivery} - Bloco: ${item.bloco}  AP ${item.num_apart}`}
             </Text>
           </View>
             )

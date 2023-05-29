@@ -42,9 +42,9 @@ const ChatScreen = ({route}) => {
     useEffect( () => {
 
       console.log(userInfo.email)
-      console.log(contact.email)
+      console.log('contact', contact)
       const salasRef = collection(database, "Salas");
-      const consulta = query(salasRef, 
+      /*const consulta = query(salasRef, 
         and(
           where('user_email','==', userInfo.email),
           where('contact_email','==', contact.email),
@@ -53,7 +53,18 @@ const ChatScreen = ({route}) => {
             where('contact_email','==', userInfo.email)
           )
         )
-      );
+      );*/
+
+      const consulta = query(salasRef, and(
+        or(
+          where("user_email","==", userInfo.email), 
+          where("contact_email","==", userInfo.email)
+        ),
+        or(
+          where("user_email","==", contact.email), 
+          where("contact_email","==", contact.email)
+        )
+      ))
 
       //where('user_email','==', contact.email),
       //   or(where('user_email','==', contact.email), where('contact_email','==',userInfo.email)) 
@@ -62,15 +73,30 @@ const ChatScreen = ({route}) => {
        
        const resposta = async () => await getDocs(consulta);
       resposta().then((respostaPesquisa)=> {
-        console.log(respostaPesquisa.docs);
+        console.log('quantidade de salas', respostaPesquisa.docs.length)
         if(respostaPesquisa.docs.length === 0){
           setHasRoom(false);
         }else{
-          const room = respostaPesquisa.docs.pop()
+
+          const rooms = respostaPesquisa.docs.filter((doc)=>  
+            {
+              console.log('############################')
+              console.log(userInfo.email, doc.data().user_email)
+                if((doc.data().user_email === contact.email ||  doc.data().user_email === userInfo.email) 
+                  && (doc.data().contact_email === userInfo.email ||  doc.data().contact_email === contact.email)  
+                ){
+                  return doc;
+                }
+            }
+          )
+
+          //console.log('Sala', room.pop().id)
+          
+          const room = rooms?.pop();
+          //console.log('room', room)
           setHasRoom(true);
           setRoomId(room.id)
           updateMessages(room.id)
-
 
           //console.log(room.data());
         }
@@ -149,8 +175,7 @@ const ChatScreen = ({route}) => {
                 createdAt: new Date(),
                 user: {
                   _id: isUserMessage ? 1 : 2,
-                  name: userInfo.email,
-                  
+                  name: contact.email,
                 },
               });
             })
@@ -164,7 +189,7 @@ const ChatScreen = ({route}) => {
      
       const message = messages?.pop()?.text;
       if(message){
-
+        console.log('tem sala?', hasRoom, roomId)
         if(!hasRoom){
           createRoom(message);
         }else{
@@ -175,7 +200,7 @@ const ChatScreen = ({route}) => {
       /*setMessages((previousMessages) =>
         GiftedChat.append(previousMessages, messages),
       );*/
-    }, [hasRoom]);
+    }, [hasRoom,roomId]);
 
     const renderBubble = (props) => {
         return(

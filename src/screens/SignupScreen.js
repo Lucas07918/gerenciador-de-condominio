@@ -7,10 +7,11 @@ import FormButton from "../components/FormButton";
 import SocialButton from "../components/SocialButton";
 // import { AuthContext } from "../navigation/AuthProvider";
 import { database } from "../../config/firebase.js";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, query, where, getDocs } from "firebase/firestore";
 
 import { auth } from "../../config/firebase"
 import { createUserWithEmailAndPassword } from "firebase/auth"
+import { AuthContext } from "../context/authContext";
 
 const SignupScreen = ({navigation}) => {
     const [name, setName] = useState();
@@ -19,6 +20,8 @@ const SignupScreen = ({navigation}) => {
     const [email, setEmail] = useState();
     const [password, setPassword] = useState();
     const [confirmPassword, setConfirmPassword] = useState();
+    const {setUserInfo} = useContext(AuthContext)
+
 
     async function addRegister() {
         try {
@@ -44,8 +47,31 @@ const SignupScreen = ({navigation}) => {
     }, []);
 
     const signup = async () => {
-        await addRegister()
-        await createUserWithEmailAndPassword(auth, email, password)
+        await addRegister().then(async ()=>{
+            await createUserWithEmailAndPassword(auth, email, password).then((respostaLogin)=>{
+            
+            
+                const userRef = collection(database, "Usuario");
+                const consulta = query(userRef, where("email", "==", email))
+    
+                
+                const resposta = async () => await getDocs(consulta);
+    
+                console.log('###############################################')
+                console.log('###############################################')
+                console.log('###############################################')
+                
+                resposta().then((respostaPesquisa) => {
+                   
+                    respostaPesquisa.docs.forEach((doc)=>{
+                        console.log('doc',doc.data())
+                        setUserInfo(doc.data())
+                    })
+                })
+            })
+        }).catch((erro)=>{
+            console.log(erro)
+        })
     }
 
     // const {register} = useContext(AuthContext);

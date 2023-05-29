@@ -7,13 +7,33 @@ import FormButton from "../components/FormButton";
 import SocialButton from "../components/SocialButton";
 // import { AuthContext } from "../navigation/AuthProvider";
 
-import { auth } from "../../config/firebase"
+import { auth, database } from "../../config/firebase"
 import { createUserWithEmailAndPassword } from "firebase/auth"
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import { AuthContext } from "../../src/context/authContext";
 
 const SignupScreen = ({navigation}) => {
+    const [name, setName] = useState();
+    const [bloco, setBloco] = useState('Portaria');
+    const [num_apart, setNum_apart] = useState('01');
     const [email, setEmail] = useState();
     const [password, setPassword] = useState();
     const [confirmPassword, setConfirmPassword] = useState();
+    const {setUserInfo} = useContext(AuthContext)
+
+    async function addRegister() {
+        try {
+          await addDoc(collection(database, "Usuario"), {
+            bloco: bloco,
+            nome: name,
+            num_apart: num_apart,
+            email: email,
+          });
+        //   navigation.navigate("Login");
+        } catch (error) {
+          console.error(error);
+        }
+      }
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((authUser) => {
@@ -25,7 +45,31 @@ const SignupScreen = ({navigation}) => {
     }, []);
 
     const signup = async () => {
-        await createUserWithEmailAndPassword(auth, email, password)
+        await addRegister().then(async ()=>{
+            await createUserWithEmailAndPassword(auth, email, password).then((respostaLogin)=>{
+            
+            
+                const userRef = collection(database, "Usuario");
+                const consulta = query(userRef, where("email", "==", email))
+    
+                
+                const resposta = async () => await getDocs(consulta);
+    
+                console.log('###############################################')
+                console.log('###############################################')
+                console.log('###############################################')
+                
+                resposta().then((respostaPesquisa) => {
+                   
+                    respostaPesquisa.docs.forEach((doc)=>{
+                        console.log('doc',doc.data())
+                        setUserInfo({...doc.data()})
+                    })
+                })
+            })
+        }).catch((erro)=>{
+            console.log('erro auth' ,erro)
+        })
     }
 
     // const {register} = useContext(AuthContext);
@@ -33,6 +77,17 @@ const SignupScreen = ({navigation}) => {
     return(
         <View style={styles.container}>
             <Text style={styles.text}>Crie uma conta</Text>
+            <Text style={styles.text}>{`${bloco}: ${num_apart}`}</Text>
+            <FormInput 
+                labelValue={name}
+                onChangeText={(userName) => setName(userName)}
+                placeholderText="Nome"
+                iconType="user"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+            />
+            
             <FormInput 
                 labelValue={email}
                 onChangeText={(userEmail) => setEmail(userEmail)}

@@ -15,6 +15,7 @@ export default function NewTask({ navigation }) {
   const [delivery, setDelivery] = useState("");
   const [apartamento, setApartamento] = useState(undefined);
   const [users, setUsers] = useState([]);
+  const [selected,setSelected] = useState(-1)
 
   useEffect(()=>{
     const userRef = collection(database, "Usuario");
@@ -65,12 +66,14 @@ export default function NewTask({ navigation }) {
         showsVerticalScrollIndicator={true}
         data={users}
        
-        renderItem={({ item }) => {
+        renderItem={({ item, index }) => {
             return(
           <TouchableOpacity 
-          style={styles.DescriptionTask}
-          onPress={() =>
+          style={selected === index ? styles.DescriptionTaskSelected : styles.DescriptionTask}
+          onPress={() => {
+            setSelected(index);
             setApartamento({bloco: item.bloco, num_apart: item.num_apart})
+          }
           }>
             <View style={styles.Tasks}>
               {/* <TouchableOpacity
@@ -79,7 +82,7 @@ export default function NewTask({ navigation }) {
               >
                 <FontAwesome name="trash" size={23} color="#3e92d1" />
               </TouchableOpacity> */}
-              <Text>
+              <Text style={selected === index ? styles.textSelected : undefined}>
                 {`${item.nome} - Bloco: ${item.bloco} ${item.num_apart}`}
               </Text>
             </View>
@@ -105,11 +108,15 @@ const styles = StyleSheet.create({
       flex:1,
       backgroundColor:'#fff'
     },
+    textSelected:{
+      color: '#fff'
+    },
     Tasks:{
       width:"100%",
       flexDirection:"row",
       justifyContent:"space-between",
-      marginTop:5
+      marginTop:5,
+      
      },
      deleteTask:{
       justifyContent:"center",
@@ -128,6 +135,20 @@ const styles = StyleSheet.create({
       marginTop: 5,
       marginLeft:20,
       color:"#282b2db5",
+    },
+    DescriptionTaskSelected:{
+      width:"85%",
+      alignContent:"flex-start",
+      backgroundColor:"#3e92d1",
+      padding:12,
+      paddingHorizontal: 20,
+      borderRadius:5,
+      borderLeftWidth: 5,
+      borderLeftColor: "#3e92d1",
+      marginBottom: 5,
+      marginTop: 5,
+      marginLeft:20,
+      color:"#fff",
     },
     label:{
       width:"90%",

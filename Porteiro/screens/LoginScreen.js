@@ -4,12 +4,16 @@ import FormInput from "../components/FormInput";
 import FormButton from "../components/FormButton";
 import SocialButton from "../components/SocialButton";
 
-import { auth } from "../../config/firebase"
+import { auth, database } from "../../config/firebase"
 import { signInWithEmailAndPassword } from "firebase/auth"
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { AuthContext } from "../../src/context/authContext";
+import { useContext } from "react";
 
 const LoginScreen = ({navigation}) => {
     const [email, setEmail] = useState();
     const [password, setPassword] = useState();
+    const {setUserInfo} = useContext(AuthContext)
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((authUser) => {
@@ -21,7 +25,27 @@ const LoginScreen = ({navigation}) => {
     }, []);
 
     const signin = async () => {
-        await signInWithEmailAndPassword(auth, email, password)
+        await signInWithEmailAndPassword(auth, email, password).then((respostaLogin)=>{
+            
+            
+            const userRef = collection(database, "Usuario");
+            const consulta = query(userRef, where("email", "==", email))
+
+            
+            const resposta = async () => await getDocs(consulta);
+
+            console.log('###############################################')
+            console.log('###############################################')
+            console.log('###############################################')
+            
+            resposta().then((respostaPesquisa) => {
+               
+                respostaPesquisa.docs.forEach((doc)=>{
+                    console.log('doc',doc.data())
+                    setUserInfo(doc.data())
+                })
+            })
+        })
     }
 
     return(
